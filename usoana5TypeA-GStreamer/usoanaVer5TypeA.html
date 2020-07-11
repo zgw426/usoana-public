@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+■ ウソ穴 Ver 5 Type A / GStreamer
+■ ユーザーがアクセスするURL
+https://{ラズパイのIPアドレス}:3001/.../usoanaVer5TypeA.html
+■ 画像
+invisible.png : 透過100%の画像
+tex001.jpg    : 穴の側面
+■ ストリーミング(Gstreamer)
+`/usoana5/parts/gstreamer/`で以下のコマンド実行する
+```
+sudo gst-launch-1.0 -v -e v4l2src device=/dev/video0 \
+ ! video/x-h264,width=480,height=480,framerate=15/1 \
+ ! h264parse ! mpegtsmux \
+ ! hlssink max-files=8 target-duration=5 \
+ location=./segment%05d.ts \
+ playlist-location=output.m3u8 \
+ playlist-root=./
+```
+-->
+<html class=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ウソ穴 Ver 5 Type A / GStreamer</title>
+    <body style="margin: 0px 0px 0px 126.5px; overflow: hidden; width: 640px; height: 480px;" class="">
+    <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.5.5/aframe/build/aframe-ar.js"></script>
+    <script src="./parts/js/hls-load-texture/hls.js@latest"></script>
+
+    <a-scene embedded="" arjs="trackingMethod:best; debugUIEnabled:false;" class="" canvas="" inspector="" keyboard-shortcuts="" screenshot="" vr-mode-ui="">
+        <a-assets>
+            <img id="img1" src="./parts/img/invisible.png" />
+            <img id="img0" src="./parts/img/tex001.jpg" />
+            <video id="base_video" autoplay="" loop="true" crossorigin="anonymous" playsinline="" webkit-playsinline="" muted="muted" src="./parts/gstreamer/output.m3u8"></video>
+        </a-assets>
+
+        <a-marker preset="hiro" position="" rotation="" scale="" visible="" material="" arjs-anchor="" arjs-hit-testing="">
+            <a-entity geometry="primitive: box; width: 20.0; depth: 20.0;" material="src: #base_video" position="0.00 -4.00 0.00" rotation="0 0 0"></a-entity>
+            <a-curvedimage src="#img0" height="0.8" radius="1.2" theta-length="360" position=" 0.00 -0.32  0.00" rotation="0 0 0" scale="0.8 0.8 0.8"></a-curvedimage>
+            <a-ring src="#img1" radius-inner="0.95" radius-outer="30.0" rotation="-90 0 0" position=" 0.00 0.00  0.00" ></a-ring>
+        </a-marker>
+    <a-entity camera="" position="" rotation="" scale="" visible=""></a-entity>
+    <canvas class="a-canvas" data-aframe-canvas="true" width="1120" height="840" style="width: 640px; height: 480px;"></canvas>
+    <div class="a-enter-vr embedded" aframe-injected="" style="position: fixed;">
+      <button class="a-enter-vr-button" aframe-injected=""></button>
+    </div>
+    <div class="a-orientation-modal a-hidden" aframe-injected="">
+      <button aframe-injected="">Exit VR</button>
+    </div>
+    <a-entity light="" data-aframe-default-light="" aframe-injected="" position="" rotation="" scale="" visible=""></a-entity>
+    <a-entity light="" position="" data-aframe-default-light="" aframe-injected="" rotation="" scale="" visible=""></a-entity>
+  </a-scene>
+
+  <script>
+    var video = document.getElementById('base_video');
+    if (Hls.isSupported()) {
+      var hls = new Hls();
+      hls.loadSource('./parts/gstreamer/output.m3u8');
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        video.play();
+      });
+    }
+  </script>
+
+</body>
+</html>
