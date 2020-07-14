@@ -10,8 +10,11 @@
 
 
 - usoana5TypeA-GStreamer
-    - GStreamerによるライブ配信と組み合わせたウソ穴
+    - ライブ配信と組み合わせたウソ穴
+    - ライブ配信はGStreamerを使用
     - ARは、A-Frameを使用
+    - 映像遅延
+        - ライブ配信の遅延に依存
 - usoana5TypeC-movie
     - 動画と組み合わせたウソ穴
     - ARは、A-Frameを使用
