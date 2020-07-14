@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta charset="utf-8"/>
+	<title>moniARring_usoana-Ver-6 (モニエアリング_ウソ穴 Ver 6.4)</title>
+	<script src='./js/three.js'></script>
+	<script src='./js/OrbitControls.js'></script>
+	<script src="./jsartoolkit5/artoolkit.min.js"></script>
+	<script src="./jsartoolkit5/artoolkit.api.js"></script>
+	<script src="./threex/threex-artoolkitsource.js"></script>
+	<script src="./threex/threex-artoolkitcontext.js"></script>
+	<script src="./threex/threex-arbasecontrols.js"></script>
+	<script src="./threex/threex-armarkercontrols.js"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/es6-tween/3.6.0/Tween.js'></script>	
+</head>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;' id="bodyArea">
+
+<video id="video" autoplay muted playsinline loop style="display:none">
+	<source src="./images/room02.mp4"></source>
+</video>
+
+
+<script>
+window.addEventListener('click', function () {
+	var v = document.querySelector("#video");
+	v.play();
+});
+</script>
+
+<script>
+
+let scene, camera, renderer, clock;
+var arToolkitSource, arToolkitContext;
+var markerRoot1;
+var mesh1;
+let m99Flg = "FIRST";
+
+initialize();
+animate();
+
+function initialize()
+{
+	scene = new THREE.Scene();
+
+	let ambientLight = new THREE.AmbientLight( 0xcccccc, 1.0 );
+	scene.add( ambientLight );
+				
+	camera = new THREE.Camera();
+	scene.add(camera);
+
+	renderer = new THREE.WebGLRenderer({
+		antialias : true,
+		alpha: true
+	});
+	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+	renderer.setSize( 640, 480 );
+	renderer.domElement.style.position = 'absolute'
+	renderer.domElement.style.top = '0px'
+	renderer.domElement.style.left = '0px'
+	document.body.appendChild( renderer.domElement );
+
+	clock = new THREE.Clock();
+
+	arToolkitSource = new THREEx.ArToolkitSource({
+		sourceType : 'webcam',
+	});
+
+	function onResize()
+	{
+		arToolkitSource.onResize()	
+		arToolkitSource.copySizeTo(renderer.domElement)	
+		if ( arToolkitContext.arController !== null )
+		{
+			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)	
+		}	
+	}
+
+	arToolkitSource.init(function onReady(){
+		onResize()
+	});
+	
+	window.addEventListener('resize', function(){
+		onResize()
+	});
+	
+	arToolkitContext = new THREEx.ArToolkitContext({
+		cameraParametersUrl: './data/camera_para.dat',
+		detectionMode: 'mono'
+	});
+	
+	arToolkitContext.init( function onCompleted(){
+		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
+	});
+
+	markerRoot1 = new THREE.Group();
+	markerRoot1.name = 'marker1';
+	scene.add(markerRoot1);
+	let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
+		type : 'pattern',
+		patternUrl : "./data/hiro.patt",
+	})
+
+	/////////////////////////////////////////////////////////////////
+	//-- Cylinder -- 手前の壁の厚み
+	let geometry1	= new THREE.CylinderGeometry(1,1, 0.2, 32,1, true);
+	let loader = new THREE.TextureLoader();
+	let texture = loader.load( './images/tex000.jpg', render );
+
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	texture.repeat.set(4,2);
+	let material1	= new THREE.MeshBasicMaterial({
+		transparent : true,
+		map: texture,
+		side: THREE.BackSide
+	}); 
+	mesh1 = new THREE.Mesh( geometry1, material1 );
+	mesh1.position.y = -0.1;
+	markerRoot1.add( mesh1 );
+
+
+	/////////////////////////////////////////////////////////////////
+	//-- Cylinder -- 奥の壁の厚み
+	let geometry2	= new THREE.CylinderGeometry(1,1, 0.2, 32,1, true);
+	//let loader = new THREE.TextureLoader();
+	let texture2 = loader.load( './images/tex000.jpg', render );
+
+	texture2.wrapS = THREE.RepeatWrapping;
+	texture2.wrapT = THREE.RepeatWrapping;
+	texture2.repeat.set(4,2);
+	let material2	= new THREE.MeshBasicMaterial({
+		transparent : true,
+		map: texture,
+		side: THREE.BackSide
+	}); 
+	mesh2 = new THREE.Mesh( geometry2, material2 );
+	//mesh2.position.y = -1.75;
+	mesh2.position.y = -0.5;
+	markerRoot1.add( mesh2 );
+
+
+	//--------------------------------------------------------//
+	// 奥の壁（不透明）
+	let geometry3 = new THREE.RingGeometry(1, 9, 32);
+	let material3 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/wall02.jpg' ),
+	});
+	let mesh3 = new THREE.Mesh( geometry3, material3 );
+	mesh3.rotation.x = -Math.PI/2;
+	//mesh3.position.y = -1.5;
+	mesh3.position.y = -0.4;
+	markerRoot1.add( mesh3 );
+
+
+
+	//--------------------------------------------------------//
+	// 板(1)
+	let geometry4 = new THREE.BoxGeometry(3.0, 0.1, 0.1);
+	let material4 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/plate01.jpg' ),
+	});
+	let mesh4 = new THREE.Mesh( geometry4, material4 );
+	mesh4.rotation.x = -Math.PI/2;
+	mesh4.position.z = -0.65;
+	//mesh4.position.y = -0.5;
+	mesh4.position.y = -0.3;
+	//markerRoot1.add( mesh4 );
+
+	//--------------------------------------------------------//
+	// 板(2)
+	let geometry5 = new THREE.BoxGeometry(0.1, 3.0, 0.1);
+	let material5 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/plate01.jpg' ),
+	});
+	let mesh5 = new THREE.Mesh( geometry5, material5 );
+	mesh5.rotation.x = -Math.PI/2;
+	mesh5.position.x = -0.70;
+	//mesh5.position.y = -0.70;
+	mesh5.position.y = -0.35;
+	markerRoot1.add( mesh5 );
+
+	//---------------------------------------------------------------------------------------//
+	// VIDEO TEXTURE
+	let geometry9 = new THREE.PlaneBufferGeometry( 4, 4, 4, 4);
+	let video = document.getElementById( 'video' );
+	let texture9 = new THREE.VideoTexture( video );
+	texture9.minFilter = THREE.LinearFilter;
+	texture9.magFilter = THREE.LinearFilter;
+	texture9.format = THREE.RGBFormat;
+	let material9 = new THREE.MeshBasicMaterial( { map: texture9 } );
+
+	mesh9 = new THREE.Mesh( geometry9, material9 );
+	mesh9.rotation.x = -Math.PI/2;
+	//mesh9.position.y = -7;
+	mesh9.position.y = -0.8;
+
+	markerRoot1.add( mesh9 );
+	//---------------------------------------------------------------------------------------//
+
+
+	//--------------------------------------------------------//
+	// 手前の壁（透明）
+	// the invisibility cloak (ring; has circular hole)
+	let geometry0 = new THREE.RingGeometry(1,9, 32);
+	let material0 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/invisible.png' ), 
+	});
+	let mesh0 = new THREE.Mesh( geometry0, material0 );
+	mesh0.rotation.x = -Math.PI/2;
+	markerRoot1.add(mesh0);	
+
+
+	//--------------------------------------------------------//
+	// フタ-99
+	let geometry99 = new THREE.PlaneGeometry( 4.8, 4.8, 32 );
+
+	let material99 = [
+		new THREE.MeshLambertMaterial({map: loader.load( './images/top3.png' ),opacity: 1.0,transparent: true})
+	];
+
+	mesh99 = new THREE.Mesh( geometry99, material99 );
+	mesh99.name = "OBJECT-99";
+
+	mesh99.rotation.x = -90.0 * ( Math.PI / 180 );
+	mesh99.rotation.y = 0.0 * ( Math.PI / 180 );
+	mesh99.rotation.z = 0.0 * ( Math.PI / 180 );
+	mesh99.position.x = 0.0;
+	mesh99.position.y = 0.05;
+	mesh99.position.z = 0.0;
+
+	markerRoot1.add( mesh99 );
+
+
+	//--------------------------------------------------------//
+	// フタ-C0
+	let geometryC0 = new THREE.RingGeometry(1.2, 2.5, 32, 8, Math.PI * 0.0, Math.PI * 0.5);
+	let materialC0 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/invisible.png' )
+		,opacity: 1.0,transparent: true
+	});
+	meshC0 = new THREE.Mesh( geometryC0, materialC0 );
+	meshC0.rotation.x = -Math.PI/2;
+	meshC0.position.y = 0.15;
+	meshC0.name = "OBJECT-C0";
+	markerRoot1.add( meshC0 );
+
+	//--------------------------------------------------------//
+	// フタ-C2
+	let geometryC2 = new THREE.RingGeometry(1.2, 2.5, 32, 8, Math.PI * 1.5, Math.PI * 0.5);
+	let materialC2 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/invisible.png' )
+		,opacity: 1.0,transparent: true
+	});
+	meshC2 = new THREE.Mesh( geometryC2, materialC2 );
+	meshC2.rotation.x = -Math.PI/2;
+	meshC2.position.y = 0.15;
+	meshC2.name = "OBJECT-C2";
+	markerRoot1.add( meshC2 );
+}
+
+
+function update()
+{
+	if( arToolkitSource.ready !== false ) arToolkitContext.update( arToolkitSource.domElement );
+
+	switch(m99Flg){
+		case "DOOR-OPEN" : 
+			let nFlg = doorOpen( mesh99 );
+			if(nFlg == 1) m99Flg = "TEXCHANGE01";			
+			break;
+		case "TEXCHANGE01" :
+			texChange(mesh99, './images/neighbor01-99.png');
+			texChangeRing("NEIGHBOR");
+			m99Flg = "NEIGHBOR";
+			break;
+		case "LINK-N01-01":
+			m99Flg = "END";
+			break;
+		case "LINK-N01-02":
+			m99Flg = "END";
+			break;
+	}
+}
+
+
+function render()
+{
+	renderer.render( scene, camera );
+}
+
+
+function animate()
+{
+	requestAnimationFrame(animate);
+	deltaTime = clock.getDelta();
+	update();
+	render();
+}
+
+
+//===================================================================
+// マウスダウン（タッチ）によるピッキング処理
+//===================================================================
+window.addEventListener("mousedown", function(ret) {
+  let mouseX = ret.clientX;                           // マウスのx座標
+  let mouseY = ret.clientY;                           // マウスのy座標
+  //console.log(mouseX + " : " + mouseY);
+  mouseX =  (mouseX / window.innerWidth)  * 2 - 1;    // -1 ～ +1 に正規化されたx座標
+  mouseY = -(mouseY / window.innerHeight) * 2 + 1;    // -1 ～ +1 に正規化されたy座標
+  let pos = new THREE.Vector3(mouseX, mouseY, 1);     // マウスベクトル
+  pos.unproject(camera);                              // スクリーン座標系をカメラ座標系に変換
+  // レイキャスタを作成（始点, 向きのベクトル）
+  let ray = new THREE.Raycaster(camera.position, pos.sub(camera.position).normalize());
+  let obj = ray.intersectObjects(scene.children, true);   // レイと交差したオブジェクトの取得
+  if(obj.length > 0) {                                // 交差したオブジェクトがあれば
+	picked(obj[0].object.name);                       // ピックされた対象に応じた処理を実行
+	console.log("debug 001");
+  }
+  console.log("-----");
+});
+
+// ピックされた対象に応じた処理
+function picked(objName) {
+	let debugStr = "";
+	debugStr += m99Flg;
+
+	switch(objName) {
+		case "OBJECT-99":
+			switch(m99Flg){
+				case "FIRST" :    m99Flg = "DOOR-OPEN"; break;
+				case "NEIGHBOR" : m99Flg = "TEXCHANGE02"; break;
+			}
+			break;
+		case "OBJECT-C0":
+			switch(m99Flg){
+				case "FIRST" : m99Flg = "TEXCHANGE01"; break;
+				case "NEIGHBOR"  : m99Flg = "LINK-N01-01"; break;
+			}
+			break;
+		case "OBJECT-C2":
+			switch(m99Flg){
+				case "FIRST" : m99Flg = "TEXCHANGE01"; break;
+				case "NEIGHBOR"  : m99Flg = "LINK-N01-02"; break;
+			}
+			break;
+	}
+	debugStr += " -> " + m99Flg;
+	console.log("objName : " + objName + " | m99Flg : " + debugStr);
+}
+
+
+
+
+
+function texChange(argMesh, argImg){
+	let loader = new THREE.TextureLoader();
+	let material = [new THREE.MeshLambertMaterial({map: loader.load( argImg ),opacity: 1.0,transparent: true})];
+	argMesh.material = material;
+	argMesh.material.map.needsUpdate = true;
+}
+
+
+function goToLink(argLink){
+	console.log("goToLink: Start");
+	window.location.href = argLink;
+	console.log("goToLink: END");
+}
+
+
+function texChangeRing(argFlg){
+	let texImg = "";
+	switch(argFlg){
+		case "NEIGHBOR" : texImg = "./images/neighbor01-Ring.png"; break;
+	}
+	let loader = new THREE.TextureLoader();
+	let material = [new THREE.MeshLambertMaterial({map: loader.load( texImg ),opacity: 1.0,transparent: true})];
+
+	meshC0.material = material;
+	meshC0.material.map.needsUpdate = true;
+
+	meshC2.material = material;
+	meshC2.material.map.needsUpdate = true;
+}
+
+
+function doorOpen(argMesh){
+	let retFlg = 0;
+	argMesh.rotation.z += 0.01;
+	argMesh.scale.x -= 0.01;
+	argMesh.scale.y -= 0.01;
+
+	if(argMesh.scale.x <= 0.2){
+		texChange(argMesh, './images/invisible.png');
+		argMesh.rotation.z = 0.0;
+		argMesh.scale.x = 1.0;
+		argMesh.scale.y = 1.0;
+		retFlg = 1;
+	}
+	return(retFlg);
+}
+
+</script>
+</body>
+</html>
