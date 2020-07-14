@@ -8,7 +8,6 @@
 
 ## バージョン情報
 
-
 - **usoana5TypeA-GStreamer**
     - ライブ配信と組み合わせたウソ穴
     - ライブ配信はGStreamerを使用
