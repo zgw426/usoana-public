@@ -10,16 +10,17 @@
 
 - **usoana5TypeA-GStreamer**
     - ライブ配信と組み合わせたウソ穴
+    - 作り方: [ウソ穴 Ver 5 Type A / GStreamer](https://qiita.com/zgw426/items/39fd3973ab8ce0a7e69c)
     - ライブ配信はGStreamerを使用
     - ARは、A-Frameを使用
     - Windows10(Chrome, Firefox)で動作実績あり
-    - 映像遅延
-        - ライブ配信の遅延に依存
-- usoana5TypeB-時雨堂 sora　※公開準備中※
+    - スマホ(iPhone,Android)非対応
+    - 映像遅延 : ライブ配信の遅延に依存
+- **usoana5TypeB-時雨堂 sora**　※公開準備中※
     - ライブ配信と組み合わせたウソ穴
     - ライブ配信は[`時雨堂`](https://shiguredo.jp/)さんの [`sora`](https://sora-labo.shiguredo.jp/) を使用
     - ARは、A-Frameを使用
-    - 映像遅延：ほぼゼロ
+    - 映像遅延 : ほぼゼロ
     - Windows10(Chrome, Firefox)で動作実績あり
  - **usoana5TypeC-movie**
     - 動画と組み合わせたウソ穴
@@ -31,14 +32,9 @@
     - ARは、Threejsを使用
     - Windows10(Chrome, Firefox)で動作実績あり
     - スマホで動作実績あり
-        - iPhone: iOS13.x + Safari
+        - iPhone : iOS13.x + Safari
         - Android 9 + Chrome
 
-## 作り方
-
-Qiitaなどで公開していきます。
-
-- [Qiita] [ウソ穴 Ver 5 Type A / GStreamer](https://qiita.com/zgw426/items/39fd3973ab8ce0a7e69c)
 
 
 
