@@ -30,8 +30,8 @@
   - tex000.jpg
   - top3.png
   - wall02.jpg
-- 用意した画像/動画データを`moniARring_usoana-Ver-6/wwwroot\images`に格納する
+- 用意した画像/動画データを`moniARring_usoana-Ver-6/wwwroot/images`に格納する
 - インターネット通信の暗号化（https化）に対応したWebサイトを用意する
 - データをWEBサーバーにおく
 
-→ Webサイトを開くと動けば成功
+→ Webサイトを開き、動けば成功
