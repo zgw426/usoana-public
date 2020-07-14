@@ -8,6 +8,6 @@
 
 Qiitaなどで公開していきます。
 
-- [ウソ穴 Ver 5 Type A / GStreamer](https://qiita.com/zgw426/items/39fd3973ab8ce0a7e69c)
+- [Qiita] [ウソ穴 Ver 5 Type A / GStreamer](https://qiita.com/zgw426/items/39fd3973ab8ce0a7e69c)
 
 
