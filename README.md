@@ -24,7 +24,8 @@
     - 動画と組み合わせたウソ穴
     - ARは、A-Frameを使用
     - Windows10(Chrome, Firefox)で動作実績あり
-    - スマホ(iPhone,Android)非対応
+    - iPhone (iOS 13.6 + Safari)で動作実績あり
+    - Android 9 + Chrome 非対応
 - **usoana6-moniARring**
     - 動画と組み合わせたウソ穴
     - ARは、Threejsを使用
