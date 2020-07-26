@@ -14,7 +14,7 @@
     - Windows10(Chrome, Firefox)で動作実績あり
     - スマホ(iPhone,Android)非対応
     - 映像遅延 : ライブ配信の遅延に依存
-- **usoana5TypeB-時雨堂 sora**　※公開準備中※
+- **usoana5TypeB-時雨堂 sora**
     - ライブ配信と組み合わせたウソ穴
     - ライブ配信は[`時雨堂`](https://shiguredo.jp/)さんの [`sora`](https://sora-labo.shiguredo.jp/) を使用
     - ARは、A-Frameを使用

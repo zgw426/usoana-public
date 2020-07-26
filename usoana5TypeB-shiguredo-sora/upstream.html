@@ -1,0 +1,40 @@
+<html lang="ja">
+    <head>
+    <meta charset="utf-8">
+    </head>
+    <body>
+    <video id="local-video" autoplay controls muted></video>
+    <script type="text/javascript" src="./parts/js/sora.min.js"></script>
+    <script type="text/javascript">
+     const channelId = 'xxxxxxxxx@sora-labo';
+     const signalingUrl = 'wss://xxxxxxxxxxxxxxxx';
+     const metadata = {"signaling_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
+
+     const debug = true;
+     const sora = Sora.connection(signalingUrl, debug);
+     let options = {
+             audio: true,
+             audioCodecType: 'OPUS',
+             audioBitRate: 96,
+             video: true,
+             videoCodecType: 'H264',
+             videoBitRate: 1500,
+         }
+     const publisher = sora.publisher(channelId, metadata, options);
+     let constraints = {
+             audio: true,
+             video: {
+                 width: 640,
+                 height: 480,
+                 frameRate: 20,
+             }
+         }
+     navigator.mediaDevices.getUserMedia(constraints)
+          .then(stream => publisher.connect(stream))
+          .then(stream => {
+              document.querySelector('#local-video').srcObject = stream;
+          })
+          .catch(e => { console.error(e); })
+    </script>
+    </body>
+</html>
