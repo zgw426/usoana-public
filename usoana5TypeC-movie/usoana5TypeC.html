@@ -23,14 +23,14 @@ Android9 + Chrome : NG
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
 
-    <a-assets id="assetsArea" onClick="goFullScreen(assetsArea);">
-      <img id="img1" src="./parts/img/invisible.png" />
-      <img id="img2" src="./parts/img/tex001.jpg" />
-      <video id="vid" autoplay loop muted poster="" playsinline><source src="./parts/movie/video.mp4" crossorigin="anonymous"></video>
-      <!-- <video id="vid" width="100" height="100" autoplay loop muted poster="" playsinline crossorigin="anonymous" playsinline="" webkit-playsinline="" muted="muted"></video> -->
-    </a-assets>
-
     <a-scene embedded arjs="debugUIEnabled:false;">
+      <a-assets id="assetsArea" onClick="goFullScreen(assetsArea);">
+        <img id="img1" src="./parts/img/invisible.png" />
+        <img id="img2" src="./parts/img/tex001.jpg" />
+        <video id="vid" autoplay loop muted poster="" playsinline><source src="./parts/movie/video.mp4" crossorigin="anonymous"></video>
+        <!-- <video id="vid" width="100" height="100" autoplay loop muted poster="" playsinline crossorigin="anonymous" playsinline="" webkit-playsinline="" muted="muted"></video> -->
+      </a-assets>
+
       <a-marker preset="hiro" position="" rotation="" scale="" visible="" material="" arjs-anchor="" arjs-hit-testing="">
         <a-box position=" 0.00 -2.00  0.00" wireframe="false" material="src: #vid" width="5.0" height="0.1" depth="5.0" rotation="" scale="" visible="" material="" geometry="" src=""></a-box>
         <a-curvedimage src="#img2" height="0.8" radius="1.2" theta-length="360" position=" 0.00 -0.32  0.00" rotation="0 0 0" scale="0.8 0.8 0.8"></a-curvedimage>
