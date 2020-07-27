@@ -20,6 +20,8 @@
     - ARは、A-Frameを使用
     - 映像遅延 : ほぼゼロ
     - Windows10(Chrome, Firefox)で動作実績あり
+    - スマホで動作実績あり
+        - iPhone : iOS13.x + Safari
  - **usoana5TypeC-movie**
     - 動画と組み合わせたウソ穴
     - ARは、A-Frameを使用
