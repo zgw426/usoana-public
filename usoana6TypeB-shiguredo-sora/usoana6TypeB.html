@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta charset="utf-8"/>
+	<title>ウソ穴 Ver 6 Type B / 時雨堂 sora</title>
+	<script src='./js/three.js'></script>
+	<script src='./js/OrbitControls.js'></script>
+	<script src="./jsartoolkit5/artoolkit.min.js"></script>
+	<script src="./jsartoolkit5/artoolkit.api.js"></script>
+	<script src="./threex/threex-artoolkitsource.js"></script>
+	<script src="./threex/threex-artoolkitcontext.js"></script>
+	<script src="./threex/threex-arbasecontrols.js"></script>
+	<script src="./threex/threex-armarkercontrols.js"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/es6-tween/3.6.0/Tween.js'></script>	
+
+	<script type="text/javascript" src="./js/sora.min.js"></script>
+
+	<style>
+		div{
+			width: 1.0px;
+			height: 1.0px;
+			overflow: hidden;
+		}
+	  </style>
+
+</head>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;' id="bodyArea">
+
+<div>
+	<video id="video" width="100" height="100" autoplay loop muted poster="" playsinline crossorigin="anonymous" playsinline="" webkit-playsinline="" muted="muted"></video>
+</div>
+
+
+<script type="text/javascript">
+	const channelId = 'xxxxxxxxx@sora-labo';
+	const signalingUrl = 'wss://xxxxxxxxxxxxxxxx';
+	const metadata = {"signaling_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"};
+
+   const debug = true;
+   const sora = Sora.connection(signalingUrl, debug);
+   let options = {
+	   audio: true,
+	   audioCodecType: 'OPUS',
+	   audioBitRate: 96,
+	   video: true,
+	   videoCodecType: 'H264',
+	   videoBitRate: 1500,
+   }
+   const subscriber = sora.subscriber(channelId, metadata, options);
+
+   subscriber.connect()
+			 .then(stream => {
+				 document.querySelector('#video').srcObject = stream;
+			 })
+			 .catch(e => {
+				 console.error(e);
+			 });
+</script>
+
+
+<script>
+
+let scene, camera, renderer, clock;
+var arToolkitSource, arToolkitContext;
+var markerRoot1;
+var mesh1;
+let m99Flg = "FIRST";
+
+initialize();
+animate();
+
+function initialize()
+{
+	scene = new THREE.Scene();
+
+	let ambientLight = new THREE.AmbientLight( 0xcccccc, 1.0 );
+	scene.add( ambientLight );
+				
+	camera = new THREE.Camera();
+	scene.add(camera);
+
+	renderer = new THREE.WebGLRenderer({
+		antialias : true,
+		alpha: true
+	});
+	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+	renderer.setSize( 640, 480 );
+	renderer.domElement.style.position = 'absolute'
+	renderer.domElement.style.top = '0px'
+	renderer.domElement.style.left = '0px'
+	document.body.appendChild( renderer.domElement );
+
+	clock = new THREE.Clock();
+
+	arToolkitSource = new THREEx.ArToolkitSource({
+		sourceType : 'webcam',
+	});
+
+	function onResize()
+	{
+		arToolkitSource.onResize()	
+		arToolkitSource.copySizeTo(renderer.domElement)	
+		if ( arToolkitContext.arController !== null )
+		{
+			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)	
+		}	
+	}
+
+	arToolkitSource.init(function onReady(){
+		onResize()
+	});
+	
+	window.addEventListener('resize', function(){
+		onResize()
+	});
+	
+	arToolkitContext = new THREEx.ArToolkitContext({
+		cameraParametersUrl: './data/camera_para.dat',
+		detectionMode: 'mono'
+	});
+	
+	arToolkitContext.init( function onCompleted(){
+		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
+	});
+
+	markerRoot1 = new THREE.Group();
+	markerRoot1.name = 'marker1';
+	scene.add(markerRoot1);
+	let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
+		type : 'pattern',
+		patternUrl : "./data/hiro.patt",
+	})
+
+	/////////////////////////////////////////////////////////////////
+	//-- Cylinder -- 壁の厚み
+	let geometry1	= new THREE.CylinderGeometry(1,1, 0.2, 32,1, true);
+	let loader = new THREE.TextureLoader();
+	let texture = loader.load( './images/tex001.jpg', render );
+
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	texture.repeat.set(4,2);
+	let material1	= new THREE.MeshBasicMaterial({
+		transparent : true,
+		map: texture,
+		side: THREE.BackSide
+	}); 
+	mesh1 = new THREE.Mesh( geometry1, material1 );
+	mesh1.position.y = -0.1;
+	markerRoot1.add( mesh1 );
+
+	//---------------------------------------------------------------------------------------//
+	// VIDEO TEXTURE
+	let geometry9 = new THREE.PlaneBufferGeometry( 4, 4, 4, 4);
+	let video = document.getElementById( 'video' );
+	let texture9 = new THREE.VideoTexture( video );
+	texture9.minFilter = THREE.LinearFilter;
+	texture9.magFilter = THREE.LinearFilter;
+	texture9.format = THREE.RGBFormat;
+	let material9 = new THREE.MeshBasicMaterial( { map: texture9 } );
+	mesh9 = new THREE.Mesh( geometry9, material9 );
+	mesh9.rotation.x = -Math.PI/2;
+	mesh9.position.y = -0.8;
+	mesh9.name = "OBJECT-9";
+	markerRoot1.add( mesh9 );
+	//---------------------------------------------------------------------------------------//
+
+	//--------------------------------------------------------//
+	// 手前の壁（透明）
+	// the invisibility cloak (ring; has circular hole)
+	let geometry0 = new THREE.RingGeometry(1,9, 32);
+	let material0 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/invisible.png' ), 
+	});
+	let mesh0 = new THREE.Mesh( geometry0, material0 );
+	mesh0.rotation.x = -Math.PI/2;
+	mesh0.name = "OBJECT-0";
+	markerRoot1.add(mesh0);	
+
+	//--------------------------------------------------------//
+	// 魔法陣
+	let geometryC1 = new THREE.CircleGeometry(1.0, 32, 0, 6.3);
+	let materialC1 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/MagicCircle.png' )
+		,opacity: 1.0,transparent: true
+	});
+	meshC1 = new THREE.Mesh( geometryC1, materialC1 );
+	meshC1.rotation.x = -Math.PI/2;
+	meshC1.position.y = 0.15;
+	meshC1.name = "OBJECT-C1";
+	markerRoot1.add( meshC1 );
+}
+
+
+function update()
+{
+	if( arToolkitSource.ready !== false ) arToolkitContext.update( arToolkitSource.domElement );
+
+	switch(m99Flg){
+		case "SAMPLE-ANIMATION" : 
+			let nFlg = FuncMagicCircle2( meshC1 );
+			break;
+	}
+}
+
+
+function render()
+{
+	renderer.render( scene, camera );
+}
+
+
+function animate()
+{
+	requestAnimationFrame(animate);
+	deltaTime = clock.getDelta();
+	update();
+	render();
+}
+
+
+//===================================================================
+// マウスダウン（タッチ）によるピッキング処理
+//===================================================================
+window.addEventListener("mousedown", function(ret) {
+  let mouseX = ret.clientX;                           // マウスのx座標
+  let mouseY = ret.clientY;                           // マウスのy座標
+  mouseX =  (mouseX / window.innerWidth)  * 2 - 1;    // -1 ～ +1 に正規化されたx座標
+  mouseY = -(mouseY / window.innerHeight) * 2 + 1;    // -1 ～ +1 に正規化されたy座標
+  let pos = new THREE.Vector3(mouseX, mouseY, 1);     // マウスベクトル
+  pos.unproject(camera);                              // スクリーン座標系をカメラ座標系に変換
+  // レイキャスタを作成（始点, 向きのベクトル）
+  let ray = new THREE.Raycaster(camera.position, pos.sub(camera.position).normalize());
+  let obj = ray.intersectObjects(scene.children, true);   // レイと交差したオブジェクトの取得
+  if(obj.length > 0) {                                // 交差したオブジェクトがあれば
+	picked(obj[0].object.name);                       // ピックされた対象に応じた処理を実行
+  }
+});
+
+// ピックされた対象に応じた処理
+function picked(objName) {
+	let debugStr = "";
+	debugStr += m99Flg;
+
+	switch(objName) {
+		case "OBJECT-9":
+			m99Flg = "SAMPLE-ANIMATION";
+			break;
+		case "OBJECT-0":
+			m99Flg = "SAMPLE-ANIMATION";
+			break;
+		case "OBJECT-C0":
+			m99Flg = "SAMPLE-ANIMATION";
+			break;
+		case "OBJECT-C1":
+			m99Flg = "SAMPLE-ANIMATION";
+			break;
+	}
+	debugStr += " -> " + m99Flg;
+	console.log("objName : " + objName + " | m99Flg : " + debugStr);
+}
+
+
+function texChange(argMesh, argImg){
+	let loader = new THREE.TextureLoader();
+	let material = [new THREE.MeshLambertMaterial({map: loader.load( argImg ),opacity: 1.0,transparent: true})];
+	argMesh.material = material;
+	argMesh.material.map.needsUpdate = true;
+}
+
+
+function goToLink(argLink){
+	console.log("goToLink: Start");
+	window.location.href = argLink;
+	console.log("goToLink: END");
+}
+
+
+function texChangeRing(argFlg){
+	let texImg = "";
+	switch(argFlg){
+		case "NEIGHBOR" : texImg = "./images/neighbor01-Ring.png"; break;
+	}
+	let loader = new THREE.TextureLoader();
+	let material = [new THREE.MeshLambertMaterial({map: loader.load( texImg ),opacity: 1.0,transparent: true})];
+
+	meshC0.material = material;
+	meshC0.material.map.needsUpdate = true;
+
+	meshC2.material = material;
+	meshC2.material.map.needsUpdate = true;
+}
+
+
+function FuncMagicCircle1(argMesh){
+	let retFlg = 0;
+	argMesh.rotation.z += 0.003;
+	return(retFlg);
+}
+
+
+function FuncMagicCircle2(argMesh){
+	let retFlg = 0;
+	argMesh.position.y -= 0.005;
+	argMesh.rotation.z += 0.003;
+	return(retFlg);
+}
+
+
+</script>
+</body>
+</html>

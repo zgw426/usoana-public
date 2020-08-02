@@ -1,9 +1,36 @@
 <!DOCTYPE html>
+<!--
+■ ウソ穴 Ver 6 Type A / GStreamer
+■ ユーザーがアクセスするURL
+https://{ラズパイのIPアドレス}:3001/.../usoana6TypeA-GStreamer/usoanaVer6TypeA.html
+■ 画像
+invisible.png : 透過100%の画像
+tex001.jpg    : 穴の側面
+MagicCircle.png : 魔法陣の画像
+
+■ ストリーミング(Gstreamer)
+`/usoana6TypeA-GStreamer/gstreamer/`で以下のコマンド実行する
+```
+sudo gst-launch-1.0 -v -e v4l2src device=/dev/video0 \
+ ! video/x-h264,width=480,height=480,framerate=15/1 \
+ ! h264parse ! mpegtsmux \
+ ! hlssink max-files=8 target-duration=5 \
+ location=./segment%05d.ts \
+ playlist-location=output.m3u8 \
+ playlist-root=./
+
+■動作確認
+Win10 + Chrome  : OK
+Win10 + FireFox : OK
+iOS13   + Safari  : OK
+Android9 + Chrome : OK
+```
+-->
 <head>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta charset="utf-8"/>
-	<title>moniARring_usoana-Ver-6 (モニエアリング_ウソ穴 Ver 6.4)</title>
+	<title>ウソ穴 Ver 6 Type A / GStreamer</title>
 	<script src='./js/three.js'></script>
 	<script src='./js/OrbitControls.js'></script>
 	<script src="./jsartoolkit5/artoolkit.min.js"></script>
@@ -15,13 +42,27 @@
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.min.js'></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/es6-tween/3.6.0/Tween.js'></script>	
+
+	<script src="./hls-load-texture/hls.js@latest"></script>
 </head>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;' id="bodyArea">
 
-<video id="video" autoplay muted playsinline loop style="display:none">
-	<source src="./images/room02.mp4"></source>
-</video>
+<video id="video" autoplay="" loop="true" crossorigin="anonymous" playsinline="" webkit-playsinline="" muted="muted" src="./gstreamer/output.m3u8" style="display:none"></video>
+
+<script>
+	var video = document.getElementById('video');
+	if (Hls.isSupported()) {
+	  var hls = new Hls();
+	  hls.loadSource('./gstreamer/output.m3u8');
+	  hls.attachMedia(video);
+	  hls.on(Hls.Events.MANIFEST_PARSED, function () {
+		video.play();
+	  });
+	}
+</script>
+
+
 
 
 <script>
@@ -30,6 +71,7 @@ window.addEventListener('click', function () {
 	v.play();
 });
 </script>
+
 
 <script>
 
@@ -108,7 +150,7 @@ function initialize()
 	//-- Cylinder -- 手前の壁の厚み
 	let geometry1	= new THREE.CylinderGeometry(1,1, 0.2, 32,1, true);
 	let loader = new THREE.TextureLoader();
-	let texture = loader.load( './images/tex000.jpg', render );
+	let texture = loader.load( './images/tex001.jpg', render );
 
 	texture.wrapS = THREE.RepeatWrapping;
 	texture.wrapT = THREE.RepeatWrapping;
@@ -122,67 +164,6 @@ function initialize()
 	mesh1.position.y = -0.1;
 	markerRoot1.add( mesh1 );
 
-
-	/////////////////////////////////////////////////////////////////
-	//-- Cylinder -- 奥の壁の厚み
-	let geometry2	= new THREE.CylinderGeometry(1,1, 0.2, 32,1, true);
-	//let loader = new THREE.TextureLoader();
-	let texture2 = loader.load( './images/tex000.jpg', render );
-
-	texture2.wrapS = THREE.RepeatWrapping;
-	texture2.wrapT = THREE.RepeatWrapping;
-	texture2.repeat.set(4,2);
-	let material2	= new THREE.MeshBasicMaterial({
-		transparent : true,
-		map: texture,
-		side: THREE.BackSide
-	}); 
-	mesh2 = new THREE.Mesh( geometry2, material2 );
-	//mesh2.position.y = -1.75;
-	mesh2.position.y = -0.5;
-	markerRoot1.add( mesh2 );
-
-
-	//--------------------------------------------------------//
-	// 奥の壁（不透明）
-	let geometry3 = new THREE.RingGeometry(1, 9, 32);
-	let material3 = new THREE.MeshBasicMaterial({
-		map: loader.load( './images/wall02.jpg' ),
-	});
-	let mesh3 = new THREE.Mesh( geometry3, material3 );
-	mesh3.rotation.x = -Math.PI/2;
-	//mesh3.position.y = -1.5;
-	mesh3.position.y = -0.4;
-	markerRoot1.add( mesh3 );
-
-
-
-	//--------------------------------------------------------//
-	// 板(1)
-	let geometry4 = new THREE.BoxGeometry(3.0, 0.1, 0.1);
-	let material4 = new THREE.MeshBasicMaterial({
-		map: loader.load( './images/plate01.jpg' ),
-	});
-	let mesh4 = new THREE.Mesh( geometry4, material4 );
-	mesh4.rotation.x = -Math.PI/2;
-	mesh4.position.z = -0.65;
-	//mesh4.position.y = -0.5;
-	mesh4.position.y = -0.3;
-	//markerRoot1.add( mesh4 );
-
-	//--------------------------------------------------------//
-	// 板(2)
-	let geometry5 = new THREE.BoxGeometry(0.1, 3.0, 0.1);
-	let material5 = new THREE.MeshBasicMaterial({
-		map: loader.load( './images/plate01.jpg' ),
-	});
-	let mesh5 = new THREE.Mesh( geometry5, material5 );
-	mesh5.rotation.x = -Math.PI/2;
-	mesh5.position.x = -0.70;
-	//mesh5.position.y = -0.70;
-	mesh5.position.y = -0.35;
-	markerRoot1.add( mesh5 );
-
 	//---------------------------------------------------------------------------------------//
 	// VIDEO TEXTURE
 	let geometry9 = new THREE.PlaneBufferGeometry( 4, 4, 4, 4);
@@ -192,15 +173,12 @@ function initialize()
 	texture9.magFilter = THREE.LinearFilter;
 	texture9.format = THREE.RGBFormat;
 	let material9 = new THREE.MeshBasicMaterial( { map: texture9 } );
-
 	mesh9 = new THREE.Mesh( geometry9, material9 );
 	mesh9.rotation.x = -Math.PI/2;
-	//mesh9.position.y = -7;
 	mesh9.position.y = -0.8;
-
+	mesh9.name = "OBJECT-9";
 	markerRoot1.add( mesh9 );
 	//---------------------------------------------------------------------------------------//
-
 
 	//--------------------------------------------------------//
 	// 手前の壁（透明）
@@ -211,55 +189,21 @@ function initialize()
 	});
 	let mesh0 = new THREE.Mesh( geometry0, material0 );
 	mesh0.rotation.x = -Math.PI/2;
+	mesh0.name = "OBJECT-0";
 	markerRoot1.add(mesh0);	
 
-
 	//--------------------------------------------------------//
-	// フタ-99
-	let geometry99 = new THREE.PlaneGeometry( 4.8, 4.8, 32 );
-
-	let material99 = [
-		new THREE.MeshLambertMaterial({map: loader.load( './images/top3.png' ),opacity: 1.0,transparent: true})
-	];
-
-	mesh99 = new THREE.Mesh( geometry99, material99 );
-	mesh99.name = "OBJECT-99";
-
-	mesh99.rotation.x = -90.0 * ( Math.PI / 180 );
-	mesh99.rotation.y = 0.0 * ( Math.PI / 180 );
-	mesh99.rotation.z = 0.0 * ( Math.PI / 180 );
-	mesh99.position.x = 0.0;
-	mesh99.position.y = 0.05;
-	mesh99.position.z = 0.0;
-
-	markerRoot1.add( mesh99 );
-
-
-	//--------------------------------------------------------//
-	// フタ-C0
-	let geometryC0 = new THREE.RingGeometry(1.2, 2.5, 32, 8, Math.PI * 0.0, Math.PI * 0.5);
-	let materialC0 = new THREE.MeshBasicMaterial({
-		map: loader.load( './images/invisible.png' )
+	// 魔法陣
+	let geometryC1 = new THREE.CircleGeometry(1.0, 32, 0, 6.3);
+	let materialC1 = new THREE.MeshBasicMaterial({
+		map: loader.load( './images/MagicCircle.png' )
 		,opacity: 1.0,transparent: true
 	});
-	meshC0 = new THREE.Mesh( geometryC0, materialC0 );
-	meshC0.rotation.x = -Math.PI/2;
-	meshC0.position.y = 0.15;
-	meshC0.name = "OBJECT-C0";
-	markerRoot1.add( meshC0 );
-
-	//--------------------------------------------------------//
-	// フタ-C2
-	let geometryC2 = new THREE.RingGeometry(1.2, 2.5, 32, 8, Math.PI * 1.5, Math.PI * 0.5);
-	let materialC2 = new THREE.MeshBasicMaterial({
-		map: loader.load( './images/invisible.png' )
-		,opacity: 1.0,transparent: true
-	});
-	meshC2 = new THREE.Mesh( geometryC2, materialC2 );
-	meshC2.rotation.x = -Math.PI/2;
-	meshC2.position.y = 0.15;
-	meshC2.name = "OBJECT-C2";
-	markerRoot1.add( meshC2 );
+	meshC1 = new THREE.Mesh( geometryC1, materialC1 );
+	meshC1.rotation.x = -Math.PI/2;
+	meshC1.position.y = 0.15;
+	meshC1.name = "OBJECT-C1";
+	markerRoot1.add( meshC1 );
 }
 
 
@@ -268,20 +212,8 @@ function update()
 	if( arToolkitSource.ready !== false ) arToolkitContext.update( arToolkitSource.domElement );
 
 	switch(m99Flg){
-		case "DOOR-OPEN" : 
-			let nFlg = doorOpen( mesh99 );
-			if(nFlg == 1) m99Flg = "TEXCHANGE01";			
-			break;
-		case "TEXCHANGE01" :
-			texChange(mesh99, './images/neighbor01-99.png');
-			texChangeRing("NEIGHBOR");
-			m99Flg = "NEIGHBOR";
-			break;
-		case "LINK-N01-01":
-			m99Flg = "END";
-			break;
-		case "LINK-N01-02":
-			m99Flg = "END";
+		case "SAMPLE-ANIMATION" : 
+			let nFlg = FuncMagicCircle2( meshC1 );
 			break;
 	}
 }
@@ -308,7 +240,6 @@ function animate()
 window.addEventListener("mousedown", function(ret) {
   let mouseX = ret.clientX;                           // マウスのx座標
   let mouseY = ret.clientY;                           // マウスのy座標
-  //console.log(mouseX + " : " + mouseY);
   mouseX =  (mouseX / window.innerWidth)  * 2 - 1;    // -1 ～ +1 に正規化されたx座標
   mouseY = -(mouseY / window.innerHeight) * 2 + 1;    // -1 ～ +1 に正規化されたy座標
   let pos = new THREE.Vector3(mouseX, mouseY, 1);     // マウスベクトル
@@ -318,9 +249,7 @@ window.addEventListener("mousedown", function(ret) {
   let obj = ray.intersectObjects(scene.children, true);   // レイと交差したオブジェクトの取得
   if(obj.length > 0) {                                // 交差したオブジェクトがあれば
 	picked(obj[0].object.name);                       // ピックされた対象に応じた処理を実行
-	console.log("debug 001");
   }
-  console.log("-----");
 });
 
 // ピックされた対象に応じた処理
@@ -329,31 +258,22 @@ function picked(objName) {
 	debugStr += m99Flg;
 
 	switch(objName) {
-		case "OBJECT-99":
-			switch(m99Flg){
-				case "FIRST" :    m99Flg = "DOOR-OPEN"; break;
-				case "NEIGHBOR" : m99Flg = "TEXCHANGE02"; break;
-			}
+		case "OBJECT-9":
+			m99Flg = "SAMPLE-ANIMATION";
+			break;
+		case "OBJECT-0":
+			m99Flg = "SAMPLE-ANIMATION";
 			break;
 		case "OBJECT-C0":
-			switch(m99Flg){
-				case "FIRST" : m99Flg = "TEXCHANGE01"; break;
-				case "NEIGHBOR"  : m99Flg = "LINK-N01-01"; break;
-			}
+			m99Flg = "SAMPLE-ANIMATION";
 			break;
-		case "OBJECT-C2":
-			switch(m99Flg){
-				case "FIRST" : m99Flg = "TEXCHANGE01"; break;
-				case "NEIGHBOR"  : m99Flg = "LINK-N01-02"; break;
-			}
+		case "OBJECT-C1":
+			m99Flg = "SAMPLE-ANIMATION";
 			break;
 	}
 	debugStr += " -> " + m99Flg;
 	console.log("objName : " + objName + " | m99Flg : " + debugStr);
 }
-
-
-
 
 
 function texChange(argMesh, argImg){
@@ -387,21 +307,20 @@ function texChangeRing(argFlg){
 }
 
 
-function doorOpen(argMesh){
+function FuncMagicCircle1(argMesh){
 	let retFlg = 0;
-	argMesh.rotation.z += 0.01;
-	argMesh.scale.x -= 0.01;
-	argMesh.scale.y -= 0.01;
-
-	if(argMesh.scale.x <= 0.2){
-		texChange(argMesh, './images/invisible.png');
-		argMesh.rotation.z = 0.0;
-		argMesh.scale.x = 1.0;
-		argMesh.scale.y = 1.0;
-		retFlg = 1;
-	}
+	argMesh.rotation.z += 0.003;
 	return(retFlg);
 }
+
+
+function FuncMagicCircle2(argMesh){
+	let retFlg = 0;
+	argMesh.position.y -= 0.005;
+	argMesh.rotation.z += 0.003;
+	return(retFlg);
+}
+
 
 </script>
 </body>

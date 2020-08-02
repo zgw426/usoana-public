@@ -1,0 +1,22 @@
+<html>
+<head>
+    <script src="./hls-load-texture/hls.js@latest"></script>
+</head>
+<body>
+    <video id="base_video" autoplay="" loop="true" crossorigin="anonymous" playsinline="" webkit-playsinline="" muted="muted" src="./gstreamer/output.m3u8"></video>
+    <script>
+        var video = document.getElementById('base_video');
+        if (Hls.isSupported()) {
+          var hls = new Hls();
+          hls.loadSource('./gstreamer/output.m3u8');
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
+          });
+        }
+    </script>
+</body>
+</html>
+
+
+
